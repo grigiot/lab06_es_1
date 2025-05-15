@@ -1,6 +1,6 @@
-use core::time;
+use std::time::{self, Instant};
 use std::sync::{Arc, Mutex};
-use std::thread::{sleep, JoinHandle};
+use std::thread::{self, sleep, JoinHandle};
 
 pub fn is_prime(n: u64) -> bool {
     if n < 2 {
@@ -23,8 +23,10 @@ pub fn find_primes(limit: u64, n_threads: u64) -> Vec<u64> {
         let cnt: Arc<Mutex<u64>> = counter.clone();
 
         jh_vec.push(std::thread::spawn(move ||{
+            let start = time::Instant::now();
             let mut res_vec: Vec<u64> = vec![];
             // let mut first_loop = true;
+            println!("THREAD {:?} started at {:?}", thread::current().id(), start);
             loop{
                 let mut p: std::sync::MutexGuard<'_, u64> = cnt.lock().unwrap();
                 
@@ -43,7 +45,7 @@ pub fn find_primes(limit: u64, n_threads: u64) -> Vec<u64> {
                     res_vec.push(n);
                 }    
             }
-            println!("THREAD {:?} -> res_vec: {:?}", std::thread::current().id(), res_vec);
+            println!("THREAD {:?} -> res_vec: {:?} -> ended after: {:?} ", std::thread::current().id(), res_vec, Instant::now()-start);
             res_vec
         }));
     }
